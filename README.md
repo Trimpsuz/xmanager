@@ -1,4 +1,4 @@
-# Website to prvoide download links for [xManager](https://github.com/Team-xManager/xManager)
+# Website to provide download links for [xManager](https://github.com/Team-xManager/xManager)
 
 No more app required just to download apks
 
