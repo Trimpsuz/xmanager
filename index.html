@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>xManager Downloads</title>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container" x-data="appData" x-init="fetchData()">
+      <template x-for="(versions, key) in categories" :key="key">
+        <div class="box">
+          <h2 x-text="key.replaceAll('_', ' ').toUpperCase()"></h2>
+          <p style="color: #bdbdbd; display: flex; justify-content: space-between">LATEST <span x-text="versions.find(version => version.latest).Title" /></p>
+          <hr style="border: none; border-radius: 8px; height: 6px; background-color: rgba(255, 255, 255, 0.1); margin: 8px 0" />
+          <div x-data="{ expanded: false }">
+            <p @click="expanded = ! expanded" style="display: flex; justify-content: space-between; cursor: pointer">
+              VERSIONS
+              <span class="material-symbols-rounded" :style="expanded ? 'transform: rotate(90deg); transition: transform 0.2s' : 'transform: rotate(0deg); transition: transform 0.2s'">
+                arrow_forward_ios
+              </span>
+            </p>
+
+            <div x-show="expanded" x-collapse>
+              <template x-for="version in versions" :key="version.Title">
+                <a
+                  :style="version.latest ? 'color: #df264b; display: flex; align-items: center; font-weight: 800; text-decoration: none' : 'color: #bdbdbd; display: flex; align-items: center; font-weight: 800; text-decoration: none'"
+                  :href="version.Mirror"
+                >
+                  <span x-text="version.latest ? 'LATEST RELEASE' : 'OLDER RELEASE'"></span>
+                  <span style="color: rgba(255, 255, 255, 0.1); margin: 0 8px">|</span>
+                  <span style="color: #fff" x-text="version.Title"></span>
+                </a>
+              </template>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+    <div class="footer">
+      <a href="https://github.com/trimpsuz/xmanager">Source code</a>
+      <a href="https://www.xmanagerapp.com/">Official xManager site</a>
+    </div>
+
+    <script>
+      const versionMap = {
+        Stock_Patched: 'Stock_Patched_Latest',
+        Amoled_Patched: 'Amoled_Patched_Latest',
+        Stock_Cloned_Patched: 'SCP_Latest',
+        Amoled_Cloned_Patched: 'ACP_Latest',
+        Stock_Experimental_Patched: 'SE_Patched_Latest',
+        Amoled_Experimental_Patched: 'AE_Patched_Latest',
+        Stock_Experimental_Cloned_Patched: 'SECP_Latest',
+        Amoled_Experimental_Cloned_Patched: 'AECP_Latest',
+        Lite_Patched: 'Lite_Patched_Latest',
+      };
+
+      const appData = {
+        categories: {},
+
+        fetchData() {
+          fetch('https://gist.githubusercontent.com/xC3FFF0E/5268182b9bc89832a9cfbe2eb0568c3c/raw/')
+            .then((response) => response.json())
+            .then((data) => {
+              data = Object.fromEntries(Object.entries(data).filter(([key, value]) => key.includes('Latest') || (Array.isArray(value) && !key.includes('Changelogs'))));
+              data = { ...data, ...Object.fromEntries(Object.entries(versionMap).map(([base, latest]) => [base, data[base]?.map((item) => ({ ...item, latest: item.Title === data[latest] }))])) };
+              data = Object.fromEntries(Object.entries(data).filter(([key, value]) => Array.isArray(value) && value.length > 0));
+              this.categories = Object.fromEntries(Object.entries(data).map(([key, array]) => [key, array.sort((a, b) => (b.latest === true) - (a.latest === true))]));
+            });
+        },
+      };
+    </script>
+  </body>
+</html>
